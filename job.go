@@ -73,17 +73,17 @@ type JobResponse struct {
 		IconUrl       string `json:"iconUrl"`
 		Score         int64  `json:"score"`
 	} `json:"healthReport"`
-	InQueue               bool       `json:"inQueue"`
-	KeepDependencies      bool       `json:"keepDependencies"`
-	LastBuild             JobBuild   `json:"lastBuild"`
-	LastCompletedBuild    JobBuild   `json:"lastCompletedBuild"`
-	LastFailedBuild       JobBuild   `json:"lastFailedBuild"`
-	LastStableBuild       JobBuild   `json:"lastStableBuild"`
-	LastSuccessfulBuild   JobBuild   `json:"lastSuccessfulBuild"`
-	LastUnstableBuild     JobBuild   `json:"lastUnstableBuild"`
-	LastUnsuccessfulBuild JobBuild   `json:"lastUnsuccessfulBuild"`
-	Name                  string     `json:"name"`
-	NextBuildNumber       int64      `json:"nextBuildNumber"`
+	InQueue               bool     `json:"inQueue"`
+	KeepDependencies      bool     `json:"keepDependencies"`
+	LastBuild             JobBuild `json:"lastBuild"`
+	LastCompletedBuild    JobBuild `json:"lastCompletedBuild"`
+	LastFailedBuild       JobBuild `json:"lastFailedBuild"`
+	LastStableBuild       JobBuild `json:"lastStableBuild"`
+	LastSuccessfulBuild   JobBuild `json:"lastSuccessfulBuild"`
+	LastUnstableBuild     JobBuild `json:"lastUnstableBuild"`
+	LastUnsuccessfulBuild JobBuild `json:"lastUnsuccessfulBuild"`
+	Name                  string   `json:"name"`
+	NextBuildNumber       int64    `json:"nextBuildNumber"`
 	Property              []struct {
 		ParameterDefinitions []ParameterDefinition `json:"parameterDefinitions"`
 	} `json:"property"`
@@ -402,14 +402,17 @@ func (j *Job) HasQueuedBuild() {
 	panic("Not Implemented yet")
 }
 
-func (j *Job) InvokeSimple(params map[string]string) (int64, error) {
-	isQueued, err := j.IsQueued()
-	if err != nil {
-		return 0, err
-	}
-	if isQueued {
-		Error.Printf("%s is already running", j.GetName())
-		return 0, nil
+func (j *Job) InvokeSimple(params map[string]string, skipIfRunning bool) (int64, error) {
+
+	if skipIfRunning {
+		isQueued, err := j.IsQueued()
+		if err != nil {
+			return 0, err
+		}
+		if isQueued {
+			Error.Printf("%s is already running", j.GetName())
+			return 0, nil
+		}
 	}
 
 	endpoint := "/build"
